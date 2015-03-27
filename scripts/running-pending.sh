@@ -1,3 +1,10 @@
 #/bin/bash!
 
-while true; do date +%s; kubectl get pods | grep unning | wc -l ; kubectl get pods | grep ending | wc -l ; sleep 2 ; echo "---" ; done
+while true; 
+do
+    x=`date +%s`
+    y=`kubectl get pods | grep unning | wc -l`
+    z=`kubectl get pods | grep ending | wc -l` 
+    echo "$x $y $z"
+    sleep 2 
+done
