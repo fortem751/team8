@@ -1,2 +1,2 @@
 # team8
-team8 scripts
+Here's where we can put the scripts we use for the phx cluster
