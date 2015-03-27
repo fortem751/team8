@@ -1,10 +1,10 @@
-#/bin/bash!
-
+#!/bin/bash
 while true; 
 do
-    x=`date +%s`
-    y=`kubectl get pods | grep unning | wc -l`
-    z=`kubectl get pods | grep ending | wc -l` 
-    echo "$x $y $z"
-    sleep 2 
+   ddd=`date +%H:%M:%S,%s` ;
+   raw=`kubectl get pods` ;
+   running=`echo $raw | grep unning | wc -l` ;
+   pending=`echo $raw | grep ending | wc -l` ;
+   echo "$ddd,$running,$pending" ;
+   sleep 1;
 done
