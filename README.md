@@ -13,7 +13,9 @@ Thi
 
 Sometimes metadata in etcd caused problems in tha past.  
 If curious about how etcd is being used, you can hackishly delete its entries like this 
+Obviously this can cause lots of problems, so be careful !
 - curl -L http://127.0.0.1:4001/v2/keys/registry?recursive=true -XDELETE
+
 
 # running go tests
 
