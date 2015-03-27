@@ -6,7 +6,7 @@ Thi
 # jenkins
 
 - http://host01-rack10.scale.openstack.engineering.redhat.com:8080/
-- symlinked to kube source for all dirs
+- symlinked to kube source for all dirs ( /mnt/build/ )
 - the unit files symlinked to source as well
 
 # hacking etcd
