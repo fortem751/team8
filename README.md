@@ -21,3 +21,8 @@ To run the ginko tests, you can do this from the src dir.
 ```go run ./cmd/e2e/e2e.go --provider="local" --host="http://127.0.0.1:8080" -t "kubectl" --auth_config=/tmp/kubernetes_auth``` 
 
 This allows you to do tests like rolling updates (filter "kubectl") , pod density (filter "Density"), and so on.  k8petstore and others will be added there to.
+
+# quickies for monitoring 
+
+# watch pa
+watch "(kubectl get pods | grep unning | wc -l) && (kubectl get pods | grep unning | wc -l)"
