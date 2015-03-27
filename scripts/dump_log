@@ -1,0 +1,5 @@
+#/bin/sh
+
+# dump the unit file logs to location
+journalctl --no-pager -u $1 -f > $2
+ 
