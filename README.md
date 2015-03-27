@@ -26,3 +26,19 @@ This allows you to do tests like rolling updates (filter "kubectl") , pod densit
 
 # watch pa
 watch "(kubectl get pods | grep unning | wc -l) && (kubectl get pods | grep unning | wc -l)"
+
+# statistics ! 
+
+`nohup while true; do date; kubectl get pods | grep unning | wc -l ; kubectl get pods | grep ending | wc -l  ; sleep 2  ; echo "---" ; `
+
+gives you 
+
+```
+date
+0
+1
+---
+date
+1
+0
+```
