@@ -1,0 +1,11 @@
+#/bin/sh
+
+echo "***** PEERS *****" 
+curl http://host17-rack11:2379/v2/members | python -mjson.tool
+echo "***** ENDPEERS *****"
+
+echo "***** CHECK THE KEYS!! *****"
+curl -L http://host01-rack10:4001/v2/keys/ | python -mjson.tool
+curl -L http://host02-rack10:4001/v2/keys/ | python -mjson.tool
+curl -L http://host17-rack11:4001/v2/keys/ | python -mjson.tool
+echo "***** ENDKEYCHECK *****"
