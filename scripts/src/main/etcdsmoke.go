@@ -8,12 +8,27 @@ import (
 	//"os"
 )
 
+func getservers() []string {
+
+	s := make([]string, 1000)
+	for i, _ := range s {
+		if i%3 == 0 {
+			s[i] = "http://host01-rack10:2379"
+		} else if i%2 == 0 {
+			s[i] = "http://host02-rack10:2379"
+		} else {
+			s[i] = "http://host17-rack11:2379"
+		}
+	}
+	return s
+}
+
 func main() {
 
 	fmt.Sprintf("-------------------------------------")
 
 	//http://host01-rack10:2379, http://host01-rack17:2379, ...
-	servers := []string{"http://host01-rack10:2379", "http://host02-rack10:2379", "http://host17-rack11:2379"}
+	servers := getservers()
 	print(servers[0])
 	for i, _ := range servers {
 		key := fmt.Sprintf("key%v", i)
@@ -21,7 +36,7 @@ func main() {
 		print(client)
 		print("\n")
 		//Each client writes a key w/ unique integer.
-		time.Sleep(time.Duration(1) * time.Second)
+		time.Sleep(time.Duration(1) * time.Nanosecond)
 		println(fmt.Sprintf("write %v", key))
 		if _, err := client.Set(key, key, 9999); err != nil {
 			print("FAIL \n")
@@ -38,10 +53,10 @@ func main() {
 			key := fmt.Sprintf("key%v", i)
 			println(fmt.Sprintf("asserting server srv=%v has key=%v...", srv, key))
 			_, err := client.Get(key, true, false)
-
+			time.Sleep(time.Duration(1) * time.Millisecond)
 			// Something went wrong.  This client doesnt have key.
 			if err != nil {
-				print(fmt.Sprintf("Failed to get cli %v key %v", srv, key))
+				print(fmt.Sprintf("FAIL!!! to get cli %v key %v", srv, key))
 				log.Fatal(err)
 			}
 		}
