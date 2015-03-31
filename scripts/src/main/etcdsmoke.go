@@ -43,10 +43,10 @@ func main() {
 			// Something went wrong.  This client doesnt have key.
 			if err != nil {
 				print(fmt.Sprintf("Failed to get cli %v key %v", i, key))
-				//t.Fatal(err)
+				log.Fatal(err)
+			} else {
+				println("Tested passed!.")
 			}
 		}
 	}
-
-	print("done \n")
 }
