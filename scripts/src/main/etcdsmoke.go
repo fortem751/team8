@@ -13,8 +13,7 @@ func main() {
 	fmt.Sprintf("-------------------------------------")
 
 	//http://host01-rack10:2379, http://host01-rack17:2379, ...
-	servers := []string{"http://host01-rack10:2379"}
-
+	servers := []string{"http://host01-rack10:2379", "http://host02-rack10:2379", "http://host17-rack11:2379"}
 	print(servers[0])
 	for i, _ := range servers {
 		key := fmt.Sprintf("key%v", i)
@@ -24,7 +23,7 @@ func main() {
 		//Each client writes a key w/ unique integer.
 		time.Sleep(time.Duration(1) * time.Second)
 		println(fmt.Sprintf("write %v", key))
-		if _, err := client.Set(key, key, 100); err != nil {
+		if _, err := client.Set(key, key, 9999); err != nil {
 			print("FAIL \n")
 			log.Fatal(err)
 		}
@@ -33,20 +32,34 @@ func main() {
 	println("")
 	//Verify that each key is reachable from each server
 	for i, _ := range servers {
-		for j, srv := range servers {
+		for _, srv := range servers {
 			//Make sure client i has key j.
 			client := etcd.NewClient([]string{srv})
-			key := fmt.Sprintf("key%v", j)
-			print(fmt.Sprintf("asserting key cli=%v key=%v\n", srv, key))
-			_, err := client.Get(key, true, true)
+			key := fmt.Sprintf("key%v", i)
+			println(fmt.Sprintf("asserting server srv=%v has key=%v...", srv, key))
+			_, err := client.Get(key, true, false)
 
 			// Something went wrong.  This client doesnt have key.
 			if err != nil {
-				print(fmt.Sprintf("Failed to get cli %v key %v", i, key))
+				print(fmt.Sprintf("Failed to get cli %v key %v", srv, key))
 				log.Fatal(err)
-			} else {
-				println("Tested passed!.")
 			}
+		}
+	}
+
+	//Now the first client deletes all keys.
+	//Thisi s both a test, and a cleanup.
+	client := etcd.NewClient([]string{servers[0]})
+	for i, _ := range servers {
+		key := fmt.Sprintf("key%v", i)
+		print(fmt.Sprintf("\n Deleting... %v ... ", key))
+		client.Delete(key, true)
+		_, err := client.Get(key, true, false)
+		if err == nil {
+			print(fmt.Sprintf("Failed delete of key %v on cli %v ", key, servers[0]))
+			log.Fatal(err)
+		} else {
+			println("Successfull deletion")
 		}
 	}
 }
