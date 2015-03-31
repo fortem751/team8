@@ -55,6 +55,7 @@ func main() {
 		print(fmt.Sprintf("\n Deleting... %v ... ", key))
 		client.Delete(key, true)
 		_, err := client.Get(key, true, false)
+		//error should occur, else delete failed~
 		if err == nil {
 			print(fmt.Sprintf("Failed delete of key %v on cli %v ", key, servers[0]))
 			log.Fatal(err)
@@ -62,4 +63,6 @@ func main() {
 			println("Successfull deletion")
 		}
 	}
+
+	println("******* PASSED WRITE/GET on all nodes *****")
 }
