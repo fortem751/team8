@@ -1,4 +1,5 @@
 #/bin/sh
 
 pdsh -w ssh:root@host[10-16]-rack11.scale.openstack.engineering.redhat.com $@ 
-pdsh -w ssh:root@host[3-18]-rack10.scale.openstack.engineering.redhat.com $@
+pdsh -w ssh:root@host0[3-9]-rack10.scale.openstack.engineering.redhat.com $@
+pdsh -w ssh:root@host[10-18]-rack10.scale.openstack.engineering.redhat.com $@
