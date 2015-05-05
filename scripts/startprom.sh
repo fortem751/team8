@@ -1,4 +1,4 @@
-if [ -f /var/log/messages ]; then 
+if [ -f /tmp/prom/file.sqlite3 ]; then 
     echo "database exists, starting dashboard"
 else
     docker run -v /tmp/prom:/tmp/prom -e DATABASE_URL=sqlite3:////tmp/prom/file.sqlite3 prom/promdash ./bin/rake db:migrate
