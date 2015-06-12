@@ -1,0 +1,31 @@
+###
+# kubernetes system config
+#
+# The following values are used to configure the kube-apiserver
+#
+
+# The address on the local server to listen to.
+KUBE_API_ADDRESS="--address=0.0.0.0"
+
+# The port on the local server to listen on.
+KUBE_API_PORT="--insecure-port=8081"
+
+# Port minions listen on
+#KUBELET_PORT="--kubelet_port=10250"
+
+# Comma separated list of nodes in the etcd cluster
+KUBE_ETCD_SERVERS="--etcd_servers=http://host01-rack10:2379,http://host02-rack10:2379,http://host17-rack11:2379"
+
+# Address range to use for services
+KUBE_SERVICE_ADDRESSES="--portal_net=10.254.0.0/16"
+
+# default admission control policies
+#KUBE_ADMISSION_CONTROL="--admission_control=NamespaceAutoProvision,LimitRanger,ResourceQuota"
+KUBE_ADMISSION_CONTROL="--admission_control=NamespaceAutoProvision,LimitRanger,SecurityContextDeny,ServiceAccount,ResourceQuota"
+KUBE_ADMISSION_CONTROL="--admission_control=NamespaceLifecycle,NamespaceAutoProvision,LimitRanger,SecurityContextDeny,ServiceAccount,ResourceQuota"
+
+# Add you own!
+### Looks like service_address_override is causing problems....???
+#KUBE_API_ARGS="--profiling=true --secure_port=0 --service_address_override=10.1.4.82"
+KUBE_API_ARGS="--profiling=true --max-requests-inflight=1000 --advertise-address=10.1.4.3 --service_account_lookup=false --service_account_key_file=/mnt/build/kube-serviceaccount.key"
+KUBE_LOG_LEVEL="--v=3"

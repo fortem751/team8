@@ -1,0 +1,8 @@
+###
+# kubernetes scheduler config
+
+# default config should be adequate
+
+# Add your own!
+#KUBE_SCHEDULER_ARGS="--profiling=true --address=0.0.0.0"
+KUBE_SCHEDULER_ARGS="--address=0.0.0.0"

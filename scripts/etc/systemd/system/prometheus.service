@@ -1,0 +1,12 @@
+[Unit]
+Description=Prometheus
+After=network.target
+
+[Service]
+User=root
+ExecStart=/mnt/build/prometheus/prometheus -storage.local.path=/var/lib/prometheus-local/metrics/ -config.file=/mnt/build/etc/prometheus/prometheus.conf
+Restart=on-failure
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

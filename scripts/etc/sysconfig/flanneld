@@ -1,0 +1,15 @@
+# Flanneld configuration options  
+
+# etcd url location.  Point this to the server where etcd runs
+#FLANNEL_ETCD="http://127.0.0.1:4001"
+
+# etcd config key.  This is the configuration key that flannel queries
+# For address range assignment
+FLANNEL_ETCD_KEY="/coreos.com/network"
+
+# Any additional options that you want to pass
+#FLANNEL_OPTIONS=""
+ 
+FLANNEL_ETCD="http://host01-rack10:2379,http://host02-rack10:2379,http://host17-rack11:2379"
+FLANNEL_OPTIONS="-iface=bond0"
+FLANNEL_IFACE="bond0"
