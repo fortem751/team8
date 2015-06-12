@@ -23,12 +23,30 @@ func getservers() []string {
 	return s
 }
 
+func clean(srv []string) {
+	client := etcd.NewClient(srv)
+	for i, _ := range servers {
+		key := fmt.Sprintf("key%v", i)
+		print(fmt.Sprintf("\n Deleting... %v ... ", key))
+		client.Delete(key, true)
+		_, err := client.Get(key, true, false)
+		//error should occur, else delete failed~
+		if err == nil {
+			print(fmt.Sprintf("Failed delete of key %v on cli %v ", key, servers[0]))
+			log.Fatal(err)
+		} else {
+			println("Successfull deletion")
+		}
+	}
+}
+
 func main() {
 
 	fmt.Sprintf("-------------------------------------")
 
 	//http://host01-rack10:2379, http://host01-rack17:2379, ...
 	servers := getservers()
+	clean(servers)
 	print(servers[0])
 	for i, _ := range servers {
 		key := fmt.Sprintf("key%v", i)
@@ -62,22 +80,6 @@ func main() {
 		}
 	}
 
-	//Now the first client deletes all keys.
-	//Thisi s both a test, and a cleanup.
-	client := etcd.NewClient([]string{servers[0]})
-	for i, _ := range servers {
-		key := fmt.Sprintf("key%v", i)
-		print(fmt.Sprintf("\n Deleting... %v ... ", key))
-		client.Delete(key, true)
-		_, err := client.Get(key, true, false)
-		//error should occur, else delete failed~
-		if err == nil {
-			print(fmt.Sprintf("Failed delete of key %v on cli %v ", key, servers[0]))
-			log.Fatal(err)
-		} else {
-			println("Successfull deletion")
-		}
-	}
-
+	clean(servers)
 	println("******* PASSED WRITE/GET on all nodes *****")
 }

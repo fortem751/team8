@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="Prometheus" ng-controller="ThemeCtrl" class="{{theme()}}">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboards | Prometheus Dashboard</title>
+    <meta name="description" content="Rails Bootstrap">
+    <link href="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/ui-lightness/jquery-ui.min.css" media="all" rel="stylesheet">
+    <link href="/assets/application-05a481706b08a133c9f6a3a3c9c13cad.css" media="all" rel="stylesheet" />
+      <script src="/assets/base-9785bc7e4d2855564371d797be12c44c.js"></script>
+    <meta content="authenticity_token" name="csrf-param" />
+<meta content="KoLJ3A9vqZDM6frmQrt48MJAzcsHL5FZ4/N5l80JKOU=" name="csrf-token" />
+  </head>
+  <body>
+
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">PromDash</a>
+        </div>
+        <div class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="/directories">Dashboards</a></li>
+            <li class=""><a href="/servers">Servers</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </div>
+
+
+    <main role="main">
+      <div class="container">
+        <div class="content">
+           <div class="row">
+            <div class="span12">
+              
+              <h2>Dashboards</h2>
+
+<div class="create_form">
+  <form accept-charset="UTF-8" action="/directories/new" method="get"><div style="display:none"><input name="utf8" type="hidden" value="&#x2713;" /></div>
+    <button type="submit" class="btn btn-primary">New Directory</button>
+</form>  <form accept-charset="UTF-8" action="/dashboards/new" method="get"><div style="display:none"><input name="utf8" type="hidden" value="&#x2713;" /></div>
+    <button type="submit" class="btn btn-primary">New Dashboard</button>
+</form></div>
+
+  <div class="directory_container">
+    <div>
+      <h3 class="directory_name">rob</h3>
+      <a class="directory_icon" href="/directories/2/edit">
+        <i class="icon-pencil"></i>
+</a>      <a class="directory_icon" data-confirm="Are you sure?" data-method="delete" href="/directories/2" rel="nofollow">
+        <i class="icon-trash"></i>
+</a>    </div>
+    <table class="table table-condensed">
+    <tr>
+      <td class="dashboard_name"><a href="/robs-1st-dash">robs 1st dash</a></td>
+      <td>
+        <a href="/dashboards/3/edit">Rename</a>
+        &nbsp;&nbsp;
+        <a href="/dashboards/3/clone">Clone</a>
+        &nbsp;&nbsp;
+        <a data-confirm="Are you sure?" data-method="delete" href="/dashboards/3" rel="nofollow">Delete</a>
+      </td>
+    </tr>
+</table>
+
+  </div>
+  <div class="directory_container">
+    <div>
+      <h3 class="directory_name">team8Dir</h3>
+      <a class="directory_icon" href="/directories/1/edit">
+        <i class="icon-pencil"></i>
+</a>      <a class="directory_icon" data-confirm="Are you sure?" data-method="delete" href="/directories/1" rel="nofollow">
+        <i class="icon-trash"></i>
+</a>    </div>
+    <table class="table table-condensed">
+    <tr>
+      <td class="dashboard_name"><a href="/team8dash">team8Dash</a></td>
+      <td>
+        <a href="/dashboards/2/edit">Rename</a>
+        &nbsp;&nbsp;
+        <a href="/dashboards/2/clone">Clone</a>
+        &nbsp;&nbsp;
+        <a data-confirm="Are you sure?" data-method="delete" href="/dashboards/2" rel="nofollow">Delete</a>
+      </td>
+    </tr>
+    <tr>
+      <td class="dashboard_name"><a href="/tims-demo-dash">TimS Demo Dash</a></td>
+      <td>
+        <a href="/dashboards/4/edit">Rename</a>
+        &nbsp;&nbsp;
+        <a href="/dashboards/4/clone">Clone</a>
+        &nbsp;&nbsp;
+        <a data-confirm="Are you sure?" data-method="delete" href="/dashboards/4" rel="nofollow">Delete</a>
+      </td>
+    </tr>
+</table>
+
+  </div>
+
+
+            </div>
+          </div>
+          <footer>
+          </footer>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>
