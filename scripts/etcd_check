@@ -1,14 +1,14 @@
 #/bin/sh
 
 echo "***** PEERS *****" 
-curl http://host17-rack11:2379/v2/members | python -mjson.tool
+curl http://host17-rack10:2379/v2/members | python -mjson.tool
 echo "***** ENDPEERS *****"
 
 echo "***** CHECK THE KEYS!! *****"
 etcdctl mkdir /etcdfoo_testABC123
 sleep 1
-curl -L http://host01-rack10:2379/v2/keys/ | python -mjson.tool
-curl -L http://host02-rack10:2379/v2/keys/ | python -mjson.tool
-curl -L http://host17-rack11:2379/v2/keys/ | python -mjson.tool
+curl -L http://host18-rack10:2379/v2/keys/ | python -mjson.tool
+curl -L http://host17-rack10:2379/v2/keys/ | python -mjson.tool
+curl -L http://host18-rack11:2379/v2/keys/ | python -mjson.tool
 etcdctl rmdir /etcdfoo_testABC123
 echo "***** ENDKEYCHECK *****"
