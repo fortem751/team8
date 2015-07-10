@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -105,4 +106,10 @@ func main () {
 	}
 	fmt.Printf("Pod Create Rate: %f/s\n", stats.podsCreated.Rate())
 	fmt.Printf("Pod Start Rate: %f/s\n", stats.podsStarted.Rate())
+
+	minStartRate := 5.0
+	if stats.podsStarted.Rate() < minStartRate {
+		fmt.Printf("Error: Start rate dropped below %f/s\n", minStartRate)
+		os.Exit(1)
+	}
 }
