@@ -1,0 +1,8 @@
+#/bin/sh
+
+LOCALPATH=`echo "$(cd "$(dirname "$0")"; pwd)"`
+INVENTORY=$LOCALPATH/inventory
+
+#echo ansible --inventory-file=$INVENTORY nodes -m shell -a \"$@\"
+#ansible --inventory-file=$INVENTORY nodes -m shell -a \"$@\" 
+ansible --inventory-file=$INVENTORY all -m shell -a \"$@\" 
