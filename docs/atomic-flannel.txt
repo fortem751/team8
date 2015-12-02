@@ -1,0 +1,31 @@
+Flannel creates an overlay network that will allow containers running on multiple physical hosts to communicate with each other as if they are on the same network.  Flannel needs to be configured on each machine that will run containers.
+
+Create a flannel configuration file called flannel-config.json with the following contents:
+{
+    "Network": "192.168.0.0/16",
+    "SubnetLen": 24,
+    "Backend": {
+        "Type": "vxlan",
+        "VNI": 1
+    }
+}
+
+Modify /etc/sysconfig/flanneld to point flannel at etcd and to use the correct interfaces;
+FLANNEL_ETCD="http://<etcd_server>:4001"
+FLANNEL_OPTIONS="-iface=<interface>"
+FLANNEL_IFACE="<interface>"
+
+NOTE: The value of the network can be any subnet, but should something that only the containers will use.
+
+Load flannel's configuration into etcd:
+curl -L http://<etcd_server>:4001/v2/keys/coreos.com/network/config -XPUT --data-urlencode value@flannel-config.json
+
+Replace <etcd_server> with the hostname or IP Address of the etcd server.
+
+Enable flannel to start on boot:
+systemctl enable flanneld
+
+Reboot the system:
+systemctl restart
+
+

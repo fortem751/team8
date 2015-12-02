@@ -1,0 +1,88 @@
+Grouped:
+kube-scheduler
+kube-controller-manager
+
+Cloned:
+kube-apiserver
+
+Cloned:
+haproxy
+
+Primitive:
+VIP
+
+#disable fencing.
+pcs property set stonith-enabled=false
+
+# creating controller + scheduler grouped resource
+pcs resource create scheduler systemd:kube-scheduler --group controller-scheduler --force
+pcs resource create controller systemd:kube-controller-manager --group controller-scheduler --force
+
+# creating api server + kub proxy group
+pcs resource create apiserver systemd:kube-apiserver --group apiserver-group --force
+pcs resource create kubeproxy systemd:kube-proxy --group apiserver-group --force 
+# clone apiserver-group
+pcs resource clone apiserver-group interleave=true
+
+# creating lb resource
+# https://github.com/davidvossel/osp-ha-deploy/blob/master/pcmk/lb.scenario
+# write these on both nodes.
+echo net.ipv4.ip_nonlocal_bind=1 >> /etc/sysctl.d/haproxy.conf
+echo 1 > /proc/sys/net/ipv4/ip_nonlocal_bind
+# execute pcs cmd on one node.
+pcs resource create haproxy systemd:haproxy systemd --clone meta interleave=true
+
+echo net.ipv4.ip_nonlocal_bind=1 >> /etc/sysctl.d/haproxy.conf
+echo 1 > /proc/sys/net/ipv4/ip_nonlocal_bind
+
+# virtual IP address.
+10.1.4.3
+pcs resource create VIP-apiserver IPaddr2 ip=10.1.4.3
+
+# colocate VIP with an active haproxy instance.
+# tell pacemaker to start the VIP before starting haproxy.
+pcs constraint order start VIP-apiserver then haproxy-clone kind=Optional
+pcs constraint colocation add VIP-apiserver with haproxy-clone
+
+# order haproxy to start and be active before api server
+pcs constraint order start haproxy-clone then apiserver-group-clone kind=Optional
+
+
+# simulate failover by putting a node into standby
+pcs cluster standby host17-rack10.scale.openstack.engineering.redhat.com
+# and to reverse standby, do this.
+pcs cluster unstandby host17-rack10.scale.openstack.engineering.redhat.com
+
+
+
+# starting and stopping services.
+pcs resource enable
+pcs resource disable
+#Example, take down apiserver clone
+pcs resource disable apiserver-group-clone --wait=30
+pcs resource enable apiserver-group-clone --wait=30
+
+# Example take down controller-schduler  group
+pcs resource disable controller-scheduler --wait=30
+
+
+#Example, failover the controller scheduler
+# find node with the active controller-scheduler group
+pcs status
+….
+     scheduler    (systemd:kube-scheduler):    Started host18-rack10.scale.openstack.engineering.redhat.com 
+     controller    (systemd:kube-controller-manager):    Started host18-rack10.scale.openstack.engineering.redhat.com 
+ Clone Set: apiserver-group-clone [apiserver-group]
+     Started: [ host17-rack10.scale.openstack.engineering.redhat.com host18-rack10.scale.openstack.engineering.redhat.com ]
+ Clone Set: haproxy-clone [haproxy]
+     Started: [ host17-rack10.scale.openstack.engineering.redhat.com host18-rack10.scale.openstack.engineering.redhat.com ]
+ VIP-apiserver    (ocf::heartbeat:IPaddr2):    Started host17-rack10.scale.openstack.engineering.redhat.com 
+
+
+
+from that output i see the controller is started on host18. to perform a failover of all the services on host18, put host18 into standby.
+pcs cluster standby host17-rack10.scale.openstack.engineering.redhat.com
+# from there monitor ‘pcs status’ output and watch the resources on host 18 move to host 17.
+
+#you can verify the status of the cluster and what resources are running using
+pcs status

@@ -1,0 +1,23 @@
+# Register with RHN and setup repos
+subscription-manager register --auto-attach
+subscription-manager repos --enable=rhel-7-server-supplementary-rpms --enable=rhel-7-server-extras-rpms --enable=rhel-7-server-optional-rpms
+
+# inventory.vms
+[masters]
+192.168.90.15
+
+[etcd]
+192.168.90.15
+
+[nodes]
+192.168.90.[16:40]
+
+# Configure with ansible
+INVENTORY=inventory.vms ./setup.sh
+
+## NOTE: ansible adds capabilties to the kube-apiserver binary that will be lost if the binary is
+## copied or replaced.  The capability can be added with:
+## sudo setcap cap_net_bind_service=ep /usr/bin/kube-apiserver
+
+# redirect the events to another apiserver/etcd pair by appending the following to KUBE_API_ARGS:
+--etcd-servers-overrides=/events#http://<event etcd>:<port>

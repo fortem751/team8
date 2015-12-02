@@ -1,0 +1,88 @@
+High Availability Kubernetes using Red Hat High Availability
+
+Red Hat High Availability can be used to provide High Availability and Load-Balancing of the kubernetes master components.  This document will go through the steps required to load-balance the kubernetes apiserver using haproxy and configure the kubernetes controller-manager and scheduler in a highly available configuration.
+
+NOTE: Load-balancing the kubernetes apiserver requires a floating and routable ip address on the same subnet as the physical machines that will run the apiservers.
+
+
+Install and setup Red Hat Enterprise Linux High Availability
+Subscribe to the “Red Hat Enterprise Linux High Availability” channel
+Install haproxy on each node by running:
+yum install -y haproxy
+Follow the steps in “Chapter 1. Creating a Red Hat High Availability Cluster with pacemaker” to install the necessary software and setup a cluster.
+https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html-single/High_Availability_Add-On_Administration/index.html#ch-startup-HAAA
+NOTE: A minimum of 3 nodes is recommended
+
+Configure haproxy
+The load-balancing of the kubernetes apiservers is handled by haproxy.  The haproxy configuration file (/etc/haproxy/haproxy.cfg) on each machine in the cluster will need to configuration sections similar to these:
+
+            frontend apiservers-insecure
+        mode                           tcp
+bind                        <addr>:8080
+    default_backend             kube-apiservers-insecure
+
+frontend apiserver-secure
+        mode                           tcp
+                bind                        <addr>:6443
+                default_backend             kube-apiservers-secure
+
+backend kube-apiservers-insecure
+                balance     roundrobin
+                server insecure-apiserver1 <apiserver1>:<port> check
+                server insecure-apiserver2 <apiserver2>:<port> check
+        server insecure-apiserver3 <apiserver3>:<port> check
+
+backend kube-apiservers-secure
+                balance     roundrobin
+                server secure-apiserver1 <apiserver1>:<port> check
+        server secure-apiserver2 <apiserver2>:<port> check
+                server secure-apiserver3 <apiserver3>:<port> check
+
+NOTE: Each backend section must list the host and port where an apiserver is running.
+
+NOTE: The <addr> in this configuration is a floating, routable ip address on the same subnet as the apiservers.
+
+Modify kubernetes components to point to haproxy
+The kubernetes components now need to be modified to talk to haproxy instead of to a specific apiserver.  The haproxy instance will handle directing communication to/from the apiservers.
+
+The kubelet’s configuration file (/etc/kubernetes/kubelet) should point the kubelet at haproxy:
+KUBELET_API_SERVER="--api_servers=http://<addr>:8080"
+
+The common configuration file (/etc/kubernetes/config) should define the master as existing on the haproxy instance:
+KUBE_MASTER="--master=http://<addr>:8080"
+
+NOTE: The <addr> in this configuration is the same floating, routable ip address configured in haproxy.
+
+Configure pacemaker to manage kubernetes master components
+controller-manager and scheduler
+Create a group in pacemaker for managing the  kubernetes controller-manager and the kubernetes scheduler processes.
+    
+pcs resource create scheduler systemd:kube-scheduler --group controller-scheduler --force
+
+pcs resource create controller systemd:kube-controller-manager --group controller-scheduler --force
+
+load balanced apiserver
+Create a group in pacemaker for managing the kubernetes apiserver.
+
+pcs resource create apiserver systemd:kube-apiserver --group apiserver-group --force
+            
+pcs resource clone apiserver-group interleave=true
+Tell the kernel to allow binding to non-local ip.
+echo net.ipv4.ip_nonlocal_bind=1 >> /etc/sysctl.d/haproxy.conf
+echo 1 > /proc/sys/net/ipv4/ip_nonlocal_bind
+
+Create a virtual IP resource
+pcs resource create VIP-apiserver IPaddr2 ip=<addr>
+
+NOTE: The <addr> in this configuration is the same floating, routable ip address configured in haproxy.
+
+Create a resource to manage haproxy.
+pcs resource create haproxy systemd:haproxy systemd --clone meta interleave=true
+
+tell pacemaker to start the VIP before starting haproxy.
+pcs constraint order start VIP-apiserver then haproxy-clone kind=Optional
+co-locate VIP with an active haproxy instance.
+pcs constraint colocation add VIP-apiserver with haproxy-clone
+order haproxy to start and be active before apiserver
+pcs constraint order start haproxy-clone then apiserver-group-clone kind=Optional
+
