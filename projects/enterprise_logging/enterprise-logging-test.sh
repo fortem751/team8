@@ -1,9 +1,12 @@
 # set -x
 
 function clean() {
+    echo "deleting all fluentd and elastic search"
 	oc scale dc/logging-fluentd --replicas=0
 	for f in `oc get pods | grep logging-es | cut -d' ' -f 1 ` ; do oc delete pod $f ; done
 }
+
+echo "newstatsrun`date`" >> /tmp/log_es_stats
 
 POD=`oc get pods | grep kibana | cut -d' ' -f 1`
 
@@ -22,18 +25,17 @@ function report() {
 # This function scales fluentd log generators 
 # Af each scale, it waits a minute, and then checks how many total logs are in kibana.
 function run() {
-	for i in `seq 1 20 300` ; do 
+	for i in `seq 1 2 300` ; do 
 		oc scale dc/logging-fluentd --replicas=$i
 		sleep 60
 		amt=`oc get pods | grep fluent | grep Running | wc -l`
 		cnt=`report`
 		cnt=$(( $cnt + 1)) # add 1 incase of zero val
-		echo "$amt $cnt pods/es_count = $(( $amt / $cnt ))"
+		echo "$amt $cnt pods/es_count = $(( $amt / $cnt )), writing to /tmp/log_es_stats"
+		echo "$amt $cnt" >> /tmp/log_es_stats
 	done
 }
 
 clean
-
-echo "need to figure out how to spread !!!!!!" 
-es 
+es
 run
