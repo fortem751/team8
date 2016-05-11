@@ -48,10 +48,13 @@ done
 
 oc process logging-support-template | oc create -f -
 
-
 ### You should see some ELK pods by now 
 
 oc get pods --all-namespaces
+
+echo "Not gauranteed that everything will pass w/ exit code 0 below, so unsetting -e"
+echo "For example: Some creates may fail but probably its nothing to worry about (yet) :)"
+unset -e
  
 ### Now deploy the rest of the infra
 
