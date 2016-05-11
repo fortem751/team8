@@ -1,5 +1,6 @@
 ### Creat from zero, not idempotent.
-
+set -x
+set -e 
 
 echo "This script shouldnt be executed by someone who doesnt understand it :)"
 echo "Rather, it documents the steps for setting up enterprise logging to the best of our knoweldge"
@@ -14,10 +15,8 @@ oc create -f \
 
 ### Make sure to delete any old secret, and use a new empty secret.  
 ### This secret will be used by kibana to talk to ES servers, and scrape the logs.  very important that its in sync.
-sudo  oc secrets delete logging-deployer ; 
-sudo  oc secrets new logging-deployer nothing=/dev/null
-
- oc secrets new logging-deployer nothing=/dev/null
+sudo oc delete secret logging-deployer || echo "couldn't delete secret!!!!!!" ; sleep 5
+sudo oc secrets new logging-deployer nothing=/dev/null
  
 ## Now create svc/roles
 
@@ -32,14 +31,23 @@ API
 
 oc policy add-role-to-user edit --serviceaccount logging-deployer
 
-oadm policy add-scc-to-user      privileged system:serviceaccount:logging:aggregated-logging-fluentd
+oadm policy add-scc-to-user privileged system:serviceaccount:logging:aggregated-logging-fluentd
 
-oadm policy add-cluster-role-to-user cluster-reader     system:serviceaccount:logging:aggregated-logging-fluentd
+oadm policy add-cluster-role-to-user cluster-reader system:serviceaccount:logging:aggregated-logging-fluentd
 
 ### Finally start deploying the logging components.
 
-oc process logging-deployer-template -v KIBANA_HOSTNAME=kibana.example.com,ES_CLUSTER_SIZE=1,PUBLIC_MASTER_URL=https://localhost:8443,IMAGE_VERSION=latest | oc create -f -
+oc process logging-deployer-template -v KIBANA_HOSTNAME=kibana.example.com,ES_CLUSTER_SIZE=1,PUBLIC_MASTER_URL=https://localhost:8443,IMAGE_VERSION=3.1.0,IMAGE_PREFIX=registry.access.redhat.com/openshift3/ | oc create -f -
+
+until oc get pods | grep -q Completed
+do
+	oc get pods
+	echo "waiting for completion..."
+	sleep 1
+done
+
 oc process logging-support-template | oc create -f -
+
 
 ### You should see some ELK pods by now 
 
@@ -52,12 +60,6 @@ oc process logging-support-template | oc create -f -
 oc get dc --selector logging-infra=elasticsearch
 
 # Now scale up the ES instances...
-oc process logging-es-template | oc create -f -
-oc process logging-es-template | oc create -f -
-oc process logging-es-template | oc create -f -
-oc process logging-es-template | oc create -f -
-oc process logging-es-template | oc create -f -
-oc process logging-es-template | oc create -f -
 oc process logging-es-template | oc create -f -
 
 oc get pods --all-namespaces
