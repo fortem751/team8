@@ -11,14 +11,13 @@ function setup_globals() {
 	'
 
 	# e2es
-	KUBEREPO=$1
+	export KUBEREPO=${1:-'/opt/jay/kubernetes'}
 	export TESTBIN=$KUBEREPO/_output/local/bin/linux/amd64/e2e.test
 
 	# pbench
-	PB_RES=${2:-'/var/lib/pbench-agent'}
-	TEST_NAME=$1
+	export PB_RES=${2:-'/var/lib/pbench-agent'}
+	export TEST_NAME=$1
 }
-
 
 function check_required() {
 	if [ ! -f $TESTBIN ]; then
@@ -26,27 +25,25 @@ function check_required() {
 		exit 1
 	fi
 
-	if [[ -z $1 ]]; then
+	if [[ -z $TESTNAME ]]; then
 		echo "Run example:"
 		echo "$(basename $0) loge2e_test1_e2e100"
 		exit 1
 	fi	
 }
 
-function usage() 
-{
+function usage() {
+	echo '
+	Accepted parameters::
+	[*] are required
 
- echo '
- Accepted parameters::
- [*] are required
- 
- -n <test name> [*]
- -e <e2e test>
- -s <scale> 
- -j <journalctl spammer>
+	-n <test name> [*]
+	-e <e2e test>
+	-s <scale> 
+	-j <journalctl spammer>
 
-  Example: 
- ./perftest.sh -n logging_e2e100_01012016 -e 100'
+	Example: 
+	./perftest.sh -n logging_e2e100_01012016 -e 100'
 }
 
 function parse_opts() {
@@ -75,7 +72,7 @@ function parse_opts() {
 		    JOURNALD=${OPTARG}
 			;;
 		h)
-			usage
+		    usage
 		    ;;
 
 		*)
@@ -109,19 +106,19 @@ function perftest() {
 	for NODE in ${NODES[@]}
 	  do
 		echo "[*] Working on $NODE"
-#		pbench-register-tool-set --remote=$NODE --interval=10
+		pbench-register-tool-set --remote=$NODE --interval=10
 		#pbench-register-tool --name=pprof --remote=$NODE -- --osecomponent=master
 	done
 
 	echo "[*] Available tools"
-#	pbench-list-tools
+	pbench-list-tools
 
 	echo "[*] Starting test"
-#	pbench-start-tools -d $PB_RES/$TEST_NAME
+	pbench-start-tools -d $PB_RES/$TEST_NAME
 
-#	$TESTBIN --repo-root=./ --ginkgo.focus="Logging" --kubeconfig=/home/cloud-user/.kube/config --scale=100
+	$TESTBIN --repo-root=./ --ginkgo.focus="Logging" --kubeconfig=/home/cloud-user/.kube/config --scale=100
 
-#	pbench-stop-tools -d $PB_RES/$TEST_NAME &> /dev/null
-#	pbench-postprocess-tools -d $PB_RES/$TEST_NAME
-#	pbench-copy-results
+	pbench-stop-tools -d $PB_RES/$TEST_NAME &> /dev/null
+	pbench-postprocess-tools -d $PB_RES/$TEST_NAME
+	pbench-copy-results
 }
