@@ -5,11 +5,15 @@ SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 UTILS=$SCRIPTDIR/utils
 source $UTILS/functions.sh
 
+trap sig_handler SIGINT
+
+# oc get pods -o wide -l component=es
 NODELIST=("192.1.11.83 192.1.11.226 192.1.11.66")
 
+setup_globals
 parse_opts $@
 check_required $@
-setup_globals
 clean_pbench
-perftest ${NODELIST[@]}
-[[ $? -eq 0 ]] && exit 0 || exit 1
+pbench_perftest ${NODELIST[@]}
+
+[[ $? -eq 0 ]] && exit $OK || exit $ERR
