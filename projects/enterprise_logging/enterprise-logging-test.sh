@@ -32,13 +32,18 @@ function report() {
 # Scale fluentd, and wait 1 minute to see if logs start increasing.
 function scale_fluentd_and_measure_log_count() {
 	oc scale dc/logging-fluentd --replicas=$FD
+	date
 	while [[ `oc get pods | grep logging-es | grep -v deploy | grep Running | wc -l` -lt $ES ]] ; do
-		echo "ES: ! `oc get pods | grep logging-es | grep Running | wc -l`  >= $ES"
-	done
-
+		tput sc
+		echo "ES: ! `oc get pods | grep logging-es | grep -v deploy | grep Running | wc -l`  >= $ES"
+		tput rc;tput el
+    done
+	date
 	while [[ `oc get pods | grep fluent | grep Running | wc -l` -lt $(( $FD - 50)) ]] ; do 
-		echo "FD ! `oc get pods | grep fluent | grep Running | wc -l`  >= $(( $FD - 50)) "
-	done
+		tput sc
+		echo -n "FD ! `oc get pods | grep fluent | grep Running | wc -l`  >= $(( $FD - 50)) "
+		tput rc;tput el
+    done
 
 	# Take 10 measurements, from this data, we can extract rate, stability, etc...
 	for i in `seq 1 1 10` ; do 
