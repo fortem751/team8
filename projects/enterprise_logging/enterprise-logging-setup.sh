@@ -76,28 +76,28 @@ oc get pods --all-namespaces
 oc scale dc/logging-fluentd --replicas=10
 
 ### You should see something like this...
-
-```
-default     docker-registry-1-35gi9       1/1       Running     0          11d
-default     redorouter-3-w964o            1/1       Running     0          11d
-logging     logging-deployer-4e0l0        0/1       Completed   0          23m
-logging     logging-es-2e42h1qh-1-jl5k7   1/1       Running     0          13m
-logging     logging-es-7sxulsdb-1-3dxoo   1/1       Running     0          4m
-logging     logging-es-ddwewixj-1-1qoid   1/1       Running     0          4m
-logging     logging-es-uyod2c2e-1-0xsq9   1/1       Running     0          6m
-logging     logging-fluentd-1-2xmmt       1/1       Running     0          3m
-logging     logging-fluentd-1-4rsfy       1/1       Running     0          3m
-logging     logging-fluentd-1-9u13m       1/1       Running     0          3m
-logging     logging-fluentd-1-cfn06       1/1       Running     0          3m
-logging     logging-fluentd-1-kwhnq       1/1       Running     0          3m
-logging     logging-fluentd-1-m0hzm       1/1       Running     0          3m
-logging     logging-fluentd-1-qe2qb       1/1       Running     0          3m
-logging     logging-fluentd-1-vy0t3       1/1       Running     0          3m
-logging     logging-fluentd-1-zcwu6       1/1       Running     0          3m
-logging     logging-fluentd-1-zrsk7       1/1       Running     0          3m
-logging     logging-kibana-1-8pip6        2/2       Running     0          13m
-```
-
+#
+#```
+#default     docker-registry-1-35gi9       1/1       Running     0          11d
+#default     redorouter-3-w964o            1/1       Running     0          11d
+#logging     logging-deployer-4e0l0        0/1       Completed   0          23m
+#logging     logging-es-2e42h1qh-1-jl5k7   1/1       Running     0          13m
+#logging     logging-es-7sxulsdb-1-3dxoo   1/1       Running     0          4m
+#logging     logging-es-ddwewixj-1-1qoid   1/1       Running     0          4m
+#logging     logging-es-uyod2c2e-1-0xsq9   1/1       Running     0          6m
+#logging     logging-fluentd-1-2xmmt       1/1       Running     0          3m
+#logging     logging-fluentd-1-4rsfy       1/1       Running     0          3m
+#logging     logging-fluentd-1-9u13m       1/1       Running     0          3m
+#logging     logging-fluentd-1-cfn06       1/1       Running     0          3m
+#logging     logging-fluentd-1-kwhnq       1/1       Running     0          3m
+#logging     logging-fluentd-1-m0hzm       1/1       Running     0          3m
+#logging     logging-fluentd-1-qe2qb       1/1       Running     0          3m
+#logging     logging-fluentd-1-vy0t3       1/1       Running     0          3m
+#logging     logging-fluentd-1-zcwu6       1/1       Running     0          3m
+#logging     logging-fluentd-1-zrsk7       1/1       Running     0          3m
+#logging     logging-kibana-1-8pip6        2/2       Running     0          13m
+#```
+#
 ### SMOKE TEST of kibana logs w/o need for a router
 export LOGGING_ES=logging-es 
 # or LOGGING_ES=logging-es-ops

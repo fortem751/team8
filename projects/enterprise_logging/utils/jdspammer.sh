@@ -13,7 +13,7 @@
 # help text
 show_help() {
 cat << EOF
-Usage: ${0##*/} [-hv] [-r lines_per_minute [-l line_length_in_chars]
+Usage: scriptname.sh [-hv] [-r lines_per_minute [-l line_length_in_chars]
 Write -r lines per minute of -l length to the systemd journal.
 
     -h          display this help and exit
@@ -50,8 +50,8 @@ while getopts "hvr:l:" opt; do
             ;;
         r)  rate=$OPTARG
             ;;
-	l)  length=$OPTARG
-	    ;;
+	    l)  length=${OPTARG}
+	        ;;
         '?')
             show_help >&2
             exit 1

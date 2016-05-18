@@ -12,7 +12,6 @@ function setup_globals() {
 
 	# e2es
 	export KUBEREPO=${1:-'/opt/kubernetes'}
-	export TESTBIN=$KUBEREPO/_output/local/bin/linux/amd64/e2e.test
 
 	# pbench
 	export PB_RES=${2:-'/var/lib/pbench-agent'}
@@ -44,7 +43,8 @@ function parse_opts() {
 	-s <scale> 	1
 	-j <jctl>	1
 	'
-
+	
+	# This is ugly.
 	while getopts ":n:e:s:j:h:" option; do
 	    case "${option}" in
 		n)
@@ -52,26 +52,27 @@ function parse_opts() {
 		    ;;
 		e)
 		    E2E=${OPTARG}
-		    RUN_TYPE="e2e"
+		    RUN_TYPE="E2E Logging Soak"
+		    TESTBIN=$KUBEREPO/_output/local/bin/linux/amd64/e2e.test
 		    CMD="$TESTBIN --repo-root=./ --ginkgo.focus=\"Logging\" --kubeconfig=/home/cloud-user/.kube/config --scale=$E2E"
 
 		    ;;
 		s)
 		    SCALE=${OPTARG}
-		    RUN_TYPE="scale"
-		    CMD="/scale/cmd/with/opts $SCALE"
+		    RUN_TYPE="Fluentd scale"
+		    TESTBIN="EXPORT FD=$SCALE ; EXPORT ES=10 ; $UTILS/fluentd_autoscaler.sh"
+		    CMD="$TESTBIN"
 		    ;;
 		j)
 		    JOURNALD=${OPTARG}
-		    RUN_type="jctl"
-		    CMD="/jctl/cmd/with/opts $JOURNALD"
-		    ;;
-		h)
-		    usage
+		    RUN_TYPE="Journalctl spammer"
+		    TESTBIN="$UTILS/jdspammer.sh"
+		    CMD="$TESTBIN -r $JOURNALD -l 512"
 		    ;;
 
 		*)
 		    echo -e "Invalid option / usage: ${option}\nExiting."
+		    usage
 		    exit $ERR
 		    ;;
 
@@ -90,11 +91,6 @@ function clean_pbench() {
 }
 
 function pbench_perftest() {
-	# TODO: Switchcase to either run
-	# 1. e2e loggin soak ; --scale=$x
-	# 2. scale test
-	# 3. jctl
-	
 	pbench-register-tool-set --interval=10
 
 	# register pbench on every node
@@ -102,20 +98,20 @@ function pbench_perftest() {
 	for NODE in ${NODES[@]}
 	do
 		echo "[*] Working on $NODE"
-		pbench-register-tool-set --remote=$NODE --interval=10
+		pbench-register-tool-set --remote=$NODE --label="x$NODE" --interval=10
 		pbench-register-tool --name=pprof --remote=$NODE -- --osecomponent=node
 	done
 
-	echo "[*] Available tools"
-	pbench-list-tools
-
-	echo "[*] Starting test"
+	echo -e "\n[*] Starting $RUN_TYPE test"
 	pbench-start-tools -d $PB_RES/$TEST_NAME
+	
+	${CMD}
 
-	$TESTBIN --repo-root=./ --ginkgo.focus="Logging" --kubeconfig=/home/cloud-user/.kube/config --scale=100
-
+	echo -e "\n[*] Stopping $RUN_TYPE"
 	pbench-stop-tools -d $PB_RES/$TEST_NAME &> /dev/null
 	pbench-postprocess-tools -d $PB_RES/$TEST_NAME
+
+	echo -e "\n[*] Copying pbench results"
 	pbench-copy-results
 }
 
@@ -123,6 +119,7 @@ cleanup() {
 	: '
 	TODO
 	'
+
         echo 'Removing tmp files...'
         return $?
 }
@@ -132,10 +129,8 @@ sig_handler() {
 	User signal handler
 	'
 
-        tput bold; tput setf 4
         echo 'Received terminate signal. Exiting.'
         cleanup
-        tput reset
         exit $ERR
 }
 
