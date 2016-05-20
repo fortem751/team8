@@ -45,14 +45,16 @@ echo "now, edit the port for spreading, containerPort: 9200 , hostPort: 1234"
 sleep 2
 oc edit template logging-es-template 
 
-#Example taken from the fluentd template:
-#
-#name: fluentd-elasticsearch
-#          ports:
-#          - containerPort: 1095
-#            hostPort: 1095
-#            protocol: TCP
+# edit this template to add 'hostPort: 1234' under any of the ports sections. this forces ES spreading.
+# for example:
+#           ports:
+#           - containerPort: 9200
+#             hostPort: 1234
+#             name: restapi
+#           - containerPort: 9300 
+
 #            purpose: to prevent more than one per node
+
 
 until oc get pods | grep -q Completed
 do
@@ -67,7 +69,7 @@ oc process logging-support-template | oc create -f -
 
 oc get pods --all-namespaces
 
-echo "Not gauranteed that everything will pass w/ exit code 0 below, so unsetting -e"
+echo "Not guaranteed that everything will pass w/ exit code 0 below, so unsetting -e"
 echo "For example: Some creates may fail but probably its nothing to worry about (yet) :)"
 unset -e
  
