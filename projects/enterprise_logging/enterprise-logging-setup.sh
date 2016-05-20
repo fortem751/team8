@@ -10,12 +10,11 @@ read x
 
 oc new-project logging
 
-oc create -f \
-/home/cloud-user/openshift-ansible/roles/openshift_examples/files/examples/v1.2/infrastructure-templates/origin/logging-deployer.yaml
+oc create -f /home/cloud-user/openshift-ansible/roles/openshift_examples/files/examples/v1.2/infrastructure-templates/origin/logging-deployer.yaml
 
 ### Make sure to delete any old secret, and use a new empty secret.  
 ### This secret will be used by kibana to talk to ES servers, and scrape the logs.  very important that its in sync.
-sudo oc delete secret logging-deployer || echo "could not delete secret" ; sleep 2
+sudo oc delete secret logging-deployer &> /dev/null || echo "could not delete secret" ; sleep 2
 sudo oc secrets new logging-deployer nothing=/dev/null
  
 ## Now create svc/roles
@@ -38,14 +37,17 @@ oadm policy add-cluster-role-to-user cluster-reader system:serviceaccount:loggin
 ### Finally start deploying the logging components.
 
 oc process logging-deployer-template -v KIBANA_HOSTNAME=kibana.example.com,ES_CLUSTER_SIZE=7,PUBLIC_MASTER_URL=https://localhost:8443,IMAGE_VERSION=3.1.0,IMAGE_PREFIX=registry.access.redhat.com/openshift3/ | oc create -f -
+sleep 15
 
-oc process logging-es-template | oc create -f -
-echo "now, edit the port for spreading, containerPort: 9200 , hostPort: 1234"
+# First process of this template will bind all the es pods to the same node. 
+# But it is required.
+#oc process logging-es-template | oc create -f -
+echo "Now, edit the port for spreading, containerPort: 9200 , hostPort: 1234"
 
-sleep 2
 oc edit template logging-es-template 
 
-# edit this template to add 'hostPort: 1234' under any of the ports sections. this forces ES spreading.
+# edit this template to add 'hostPort: 1234' under any of the ports sections.
+# This forces ES spreading.
 # for example:
 #           ports:
 #           - containerPort: 9200
@@ -55,6 +57,10 @@ oc edit template logging-es-template
 
 #            purpose: to prevent more than one per node
 
+# 
+# template "logging-es-template" edited
+
+oc process logging-support-template | oc create -f -
 
 until oc get pods | grep -q Completed
 do
@@ -63,11 +69,9 @@ do
 	sleep 1
 done
 
-oc process logging-support-template | oc create -f -
-
 ### You should see some ELK pods by now 
 
-oc get pods --all-namespaces
+oc get pods --all-namespaces -o wide
 
 echo "Not guaranteed that everything will pass w/ exit code 0 below, so unsetting -e"
 echo "For example: Some creates may fail but probably its nothing to worry about (yet) :)"
@@ -79,7 +83,7 @@ oc process logging-support-template | oc create -f -
 
 oc get dc --selector logging-infra=elasticsearch
 
-# Now scale up the ES instances...
+# Now scale up the ES instances... Same as line 45, but the pods should now spread.
 for i in `seq 1 7`; do oc process logging-es-template | oc create -f - ; done
 
 oc get pods --all-namespaces
