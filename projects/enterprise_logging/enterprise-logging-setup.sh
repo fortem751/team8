@@ -68,7 +68,7 @@ oc process logging-support-template | oc create -f -
 oc get dc --selector logging-infra=elasticsearch
 
 # Now scale up the ES instances...
-oc process logging-es-template | oc create -f -
+for i in `seq 1 7`; do oc process logging-es-template | oc create -f - ; done
 
 oc get pods --all-namespaces
 
