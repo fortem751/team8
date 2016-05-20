@@ -15,7 +15,7 @@ oc create -f \
 
 ### Make sure to delete any old secret, and use a new empty secret.  
 ### This secret will be used by kibana to talk to ES servers, and scrape the logs.  very important that its in sync.
-sudo oc delete secret logging-deployer || echo "couldn't delete secret!!!!!!" ; sleep 5
+sudo oc delete secret logging-deployer || echo "could not delete secret" ; sleep 2
 sudo oc secrets new logging-deployer nothing=/dev/null
  
 ## Now create svc/roles
