@@ -37,7 +37,7 @@ oadm policy add-cluster-role-to-user cluster-reader system:serviceaccount:loggin
 
 ### Finally start deploying the logging components.
 
-oc process logging-deployer-template -v KIBANA_HOSTNAME=kibana.example.com,ES_CLUSTER_SIZE=1,PUBLIC_MASTER_URL=https://localhost:8443,IMAGE_VERSION=3.1.0,IMAGE_PREFIX=registry.access.redhat.com/openshift3/ | oc create -f -
+oc process logging-deployer-template -v KIBANA_HOSTNAME=kibana.example.com,ES_CLUSTER_SIZE=7,PUBLIC_MASTER_URL=https://localhost:8443,IMAGE_VERSION=3.1.0,IMAGE_PREFIX=registry.access.redhat.com/openshift3/ | oc create -f -
 
 oc process logging-es-template | oc create -f -
 echo "now, edit the port for spreading, containerPort: 9200 , hostPort: 1234"
