@@ -41,8 +41,18 @@ oc process logging-deployer-template -v KIBANA_HOSTNAME=kibana.example.com,ES_CL
 
 oc process logging-es-template | oc create -f -
 echo "now, edit the port for spreading, containerPort: 9200 , hostPort: 1234"
+
 sleep 2
 oc edit template logging-es-template 
+
+#Example taken from the fluentd template:
+#
+#name: fluentd-elasticsearch
+#          ports:
+#          - containerPort: 1095
+#            hostPort: 1095
+#            protocol: TCP
+#            purpose: to prevent more than one per node
 
 until oc get pods | grep -q Completed
 do
