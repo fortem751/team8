@@ -1,0 +1,76 @@
+[OSEv3:children]
+masters
+nodes
+etcd
+lb
+
+[OSEv3:vars]
+ansible_ssh_user=cloud-user
+ansible_sudo=true
+deployment_type=openshift-enterprise
+
+# Setup native HA
+openshift_master_cluster_method=native
+
+# Set the load-balancer ip as the master ip
+openshift_master_cluster_hostname=192.1.12.25
+
+# Set the floating ip as the public ip for web console access
+openshift_master_cluster_public_hostname=10.1.236.11
+
+# Allow any user by default
+openshift_master_identity_providers=[{'name': 'allow_all', 'login': 'true', 'challenge': 'true', 'kind': 'AllowAllPasswordIdentityProvider'}]
+
+# Services IP space
+openshift_master_portal_net=172.24.0.0/14
+
+# SDN cluster network
+osm_cluster_network_cidr=172.20.0.0/14
+
+# The size of the per host subnet allocated for pod IPs
+osm_host_subnet_length=8
+
+# Use IPs only instead of DNS
+openshift_set_hostname=true
+openshift_hostname="{{ ansible_default_ipv4.address}}"
+openshift_public_hostname="{{ ansible_default_ipv4.address}}"
+openshift_public_ip="{{ ansible_default_ipv4.address}}"
+
+# Add a repo to get the rpms
+openshift_additional_repos=[{'id': 'RHAOS-latest', 'name': 'Red Hat Atomic Openshift 3.2', 'baseurl': 'http://192.1.7.104/latest', 'enabled': 1, 'gpgcheck': 0}]
+
+# Increase max_pods on the nodes
+openshift_node_kubelet_args={'max-pods': ['120']}
+
+# Add multi-tenant sdn
+os_sdn_network_plugin_name='redhat/openshift-ovs-multitenant'
+
+# Enable cluster metrics
+use_cluster_metrics=true
+
+# disable cockpit installation
+osm_use_cockpit=false
+
+# Allow OpenShift to use pods that are tagged "latest" when there is no exact
+# version match 
+#openshift_imageconfig_latest=true
+
+# Add the QE registry
+oreg_url=registry.qe.openshift.com/openshift3/ose-${component}:${version} 
+cli_docker_additional_registries=registry.qe.openshift.com
+cli_docker_insecure_registries=registry.qe.openshift.com
+
+[masters]
+192.1.12.[22:24]
+
+[etcd]
+192.1.12.[19:21]
+
+[lb]
+192.1.12.25
+
+[nodes]
+192.1.12.[22:24] openshift_schedulable=False
+192.1.12.26 openshift_node_labels="{'region': 'infra', 'zone': 'default'}"
+192.1.12.[27:255] openshift_node_labels="{'region': 'primary', 'zone': 'default'}"
+192.1.13.[0:70] openshift_node_labels="{'region': 'primary', 'zone': 'default'}"
